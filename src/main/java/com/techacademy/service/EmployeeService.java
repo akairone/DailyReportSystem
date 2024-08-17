@@ -119,4 +119,8 @@ public class EmployeeService {
         return passwordLength < 8 || 16 < passwordLength;
     }
 
+    public Employee getUser(String code) {
+        return employeeRepository.findById(code).orElse(null);
+    }
+
 }
