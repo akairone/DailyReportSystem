@@ -53,28 +53,38 @@ public class EmployeeController {
 	@GetMapping(value = "/{code}/update")
 	public String getupdate(@PathVariable String code, Model model, Employee employee) {
 		if (code == null) {
-			model.addAttribute("emp", employee);
+			model.addAttribute("employee", employee);
 		} else {
 
-			model.addAttribute("emp", employeeService.findByCode(code));
+			model.addAttribute("employee", employeeService.findByCode(code));
 		}
 
 		return "employees/update";
 	}
 
 	// 従業員更新処理
-	@PostMapping("/update")
+	@PostMapping(value = "/update")
 	public String postupdate(@Validated Employee employee, BindingResult res, Model model) {
+
+
+		ErrorKinds result = employeeService.save(employee);
+
+		if (ErrorMessage.contains(result)) {
+			model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+			return getupdate(null, model, employee);
+		}
 
 		if (res.hasErrors()) {
 			return getupdate(null, model, employee);
 		}
 
+
+
 		// User登録
 		employeeService.save(employee);
 
-		// 一覧画面にリダイレクト
-		return "redirect:/user/list";
+
+		return "redirect:/employees";
 	}
 
 	// 従業員新規登録画面
