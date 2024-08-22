@@ -67,21 +67,18 @@ public class EmployeeController {
 	public String postupdate(@Validated Employee employee, BindingResult res, Model model) {
 
 
-		ErrorKinds result = employeeService.save(employee);
+
+		if (res.hasErrors()) {
+			return getupdate(null, model, employee);
+		}
+
+		ErrorKinds result = employeeService.update(employee);
 
 		if (ErrorMessage.contains(result)) {
 			model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
 			return getupdate(null, model, employee);
 		}
 
-		if (res.hasErrors()) {
-			return getupdate(null, model, employee);
-		}
-
-
-
-		// User登録
-		employeeService.save(employee);
 
 
 		return "redirect:/employees";
