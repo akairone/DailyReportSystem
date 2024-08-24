@@ -63,7 +63,7 @@ public class ReportService {
 	}
 
 	// 1件を検索
-	public Report findById(String id) {
+	public Report findById(int id) {
 		// findByIdで検索
 		Optional<Report> option = reportRepository.findById(id);
 		// 取得できなかった場合はnullを返す

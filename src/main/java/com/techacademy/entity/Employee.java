@@ -2,6 +2,7 @@
 package com.techacademy.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
@@ -11,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -33,6 +35,7 @@ public class Employee {
         public String getValue() {
             return this.name;
         }
+
     }
 
     // ID
@@ -41,6 +44,11 @@ public class Employee {
     @NotEmpty
     @Length(max = 10)
     private String code;
+
+    @OneToMany
+    List<Report> reports;
+
+
 
     // 名前
     @Column(length = 20, nullable = false)

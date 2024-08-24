@@ -2,60 +2,60 @@
 package com.techacademy.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "employees")
+@Table(name = "reports")
 @SQLRestriction("delete_flg = false")
 public class Report {
 
-    public static enum Role {
-        GENERAL("一般"), ADMIN("管理者");
 
-        private String name;
-
-        private Role(String name) {
-            this.name = name;
-        }
-
-        public String getValue() {
-            return this.name;
-        }
-    }
 
     // ID
     @Id
     @Column(length = 10)
     @NotEmpty
     @Length(max = 10)
-    private String id;
+    private int id;
 
-    // 名前
-    @Column(length = 20, nullable = false)
+    @ManyToOne
+    Employee employee;
+
+    //日付
+    @Column(nullable = false)
     @NotEmpty
-    @Length(max = 20)
-    private String name;
+    private LocalDateTime reportDate;
 
-    // 権限
-    @Column(columnDefinition="VARCHAR(10)", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    // タイトル
+    @Column(length = 100,nullable = false)
+    @NotEmpty
+    @Length(max = 100)
+    private String title;
 
-    // パスワード
-    @Column(length = 255, nullable = false)
-    private String password;
+    // 内容
+    @Column(nullable = false)
+    @NotEmpty
+    private String content;
+
+    // 社員番号
+    @Column(length = 10, nullable = false)
+    @NotEmpty
+    @Length(max = 10)
+    private String employeeCode;
+
 
     // 削除フラグ(論理削除を行うため)
     @Column(columnDefinition="TINYINT", nullable = false)
