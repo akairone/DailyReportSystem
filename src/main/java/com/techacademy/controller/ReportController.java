@@ -16,136 +16,122 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.techacademy.constants.ErrorKinds;
 import com.techacademy.constants.ErrorMessage;
 
-import com.techacademy.entity.Employee;
-import com.techacademy.service.EmployeeService;
-import com.techacademy.service.UserDetail;
+import com.techacademy.entity.Report;
+import com.techacademy.service.ReportService;
+import com.techacademy.service.ContentDetail;
 
 @Controller
 @RequestMapping("reports")
 public class ReportController {
 
-	private final EmployeeService employeeService;
+	private final ReportService reportService;
 
 	@Autowired
-	public ReportController(EmployeeService employeeService) {
-		this.employeeService = employeeService;
+	public ReportController(ReportService reportService) {
+		this.reportService = reportService;
 	}
 
-	// 従業員一覧画面
+	// 日報一覧画面
 	@GetMapping
 	public String list(Model model) {
 
-		model.addAttribute("listSize", employeeService.findAll().size());
-		model.addAttribute("employeeList", employeeService.findAll());
+		model.addAttribute("listSize", reportService.findAll().size());
+		model.addAttribute("reportList", reportService.findAll());
 
-		return "employees/list";
+		return "reports/list";
 	}
 
-	// 従業員詳細画面
-	@GetMapping(value = "/{code}/")
-	public String detail(@PathVariable String code, Model model) {
+	// 日報詳細画面
+	@GetMapping(value = "/{id}/")
+	public String detail(@PathVariable String id, Model model) {
 
-		model.addAttribute("employee", employeeService.findByCode(code));
-		return "employees/detail";
+		model.addAttribute("report", reportService.findById(id));
+		return "reports/detail";
 	}
 
-	// 従業員更新画面
-	@GetMapping(value = "/{code}/update")
-	public String getupdate(@PathVariable String code, Model model, Employee employee) {
-		if (code == null) {
-			model.addAttribute("employee", employee);
+	// 日報更新画面
+	@GetMapping(value = "/{id}/update")
+	public String getupdate(@PathVariable String id, Model model, Report report) {
+		if (id == null) {
+			model.addAttribute("report", report);
 		} else {
 
-			model.addAttribute("employee", employeeService.findByCode(code));
+			model.addAttribute("report", reportService.findById(id));
 		}
 
-		return "employees/update";
+		return "reports/update";
 	}
 
-	// 従業員更新処理
+	// 日報更新処理
 	@PostMapping(value = "/update")
-	public String postupdate(@Validated Employee employee, BindingResult res, Model model) {
+	public String postupdate(@Validated Report report, BindingResult res, Model model) {
 
 
 
 		if (res.hasErrors()) {
-			return getupdate(null, model, employee);
+			return getupdate(null, model, report);
 		}
 
-		ErrorKinds result = employeeService.update(employee);
+		ErrorKinds result = reportService.update(report);
 
 		if (ErrorMessage.contains(result)) {
 			model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-			return getupdate(null, model, employee);
+			return getupdate(null, model, report);
 		}
 
 
 
-		return "redirect:/employees";
+		return "redirect:/reports";
 	}
 
-	// 従業員新規登録画面
+	// 日報新規登録画面
 	@GetMapping(value = "/add")
-	public String create(@ModelAttribute Employee employee) {
+	public String create(@ModelAttribute Report report) {
 
-		return "employees/new";
+		return "reports/new";
 	}
 
-	// 従業員新規登録処理
+	// 日報新規登録処理
 	@PostMapping(value = "/add")
-	public String add(@Validated Employee employee, BindingResult res, Model model) {
+	public String add(@Validated Report report, BindingResult res, Model model) {
 
-		// パスワード空白チェック
-		/*
-		 * エンティティ側の入力チェックでも実装は行えるが、更新の方でパスワードが空白でもチェックエラーを出さずに
-		 * 更新出来る仕様となっているため上記を考慮した場合に別でエラーメッセージを出す方法が簡単だと判断
-		 */
-		if ("".equals(employee.getPassword())) {
-			// パスワードが空白だった場合
-			model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.BLANK_ERROR),
-					ErrorMessage.getErrorValue(ErrorKinds.BLANK_ERROR));
-
-			return create(employee);
-
-		}
 
 		// 入力チェック
 		if (res.hasErrors()) {
-			return create(employee);
+			return create(report);
 		}
 
-		// 論理削除を行った従業員番号を指定すると例外となるためtry~catchで対応
-		// (findByIdでは削除フラグがTRUEのデータが取得出来ないため)
+
 		try {
-			ErrorKinds result = employeeService.save(employee);
+			ErrorKinds result = reportService.save(report);
 
 			if (ErrorMessage.contains(result)) {
 				model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-				return create(employee);
+				return create(report);
 			}
 
 		} catch (DataIntegrityViolationException e) {
 			model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DUPLICATE_EXCEPTION_ERROR),
 					ErrorMessage.getErrorValue(ErrorKinds.DUPLICATE_EXCEPTION_ERROR));
-			return create(employee);
+			return create(report);
 		}
 
-		return "redirect:/employees";
+		return "redirect:/reports";
 	}
 
-	// 従業員削除処理
+	// 日報削除処理
 	@PostMapping(value = "/{code}/delete")
-	public String delete(@PathVariable String code, @AuthenticationPrincipal UserDetail userDetail, Model model) {
+	public String delete(@PathVariable String id, @AuthenticationPrincipal ContentDetail contentDetail, Model model) {
 
-		ErrorKinds result = employeeService.delete(code, userDetail);
+		ErrorKinds result = reportService.delete(id, contentDetail);
 
 		if (ErrorMessage.contains(result)) {
 			model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-			model.addAttribute("employee", employeeService.findByCode(code));
-			return detail(code, model);
+			model.addAttribute("report", reportService.findById(id));
+			return detail(id, model);
 		}
 
-		return "redirect:/employees";
+		return "redirect:/reports";
 	}
 
 }
