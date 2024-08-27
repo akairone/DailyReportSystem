@@ -29,8 +29,8 @@ public class ReportService {
 
 	// 日報保存
 	@Transactional
-	public ErrorKinds save(Report report) {
-		return null;
+	public List<Report> save(Report report) {
+		return reportRepository.findAll();
 
 	}
 
@@ -50,9 +50,14 @@ public class ReportService {
 		return ErrorKinds.SUCCESS;
 	}
 
+	public Report findById(int id) {
+		// TODO 自動生成されたメソッド・スタブ
+		return null;
+	}
+
 	// 従業員削除
 	@Transactional
-	public ErrorKinds delete(String code, ContentDetail contentDetail) {
+	public ErrorKinds delete(int id, ContentDetail contentDetail) {
 		return null;
 
 	}
@@ -63,7 +68,7 @@ public class ReportService {
 	}
 
 	// 1件を検索
-	public Report findById(int id) {
+	public Report findById(String id) {
 		// findByIdで検索
 		Optional<Report> option = reportRepository.findById(id);
 		// 取得できなかった場合はnullを返す

@@ -15,9 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.techacademy.constants.ErrorKinds;
 import com.techacademy.constants.ErrorMessage;
-
+import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
 import com.techacademy.service.ReportService;
+import com.techacademy.service.UserDetail;
 import com.techacademy.service.ContentDetail;
 
 @Controller
@@ -43,7 +44,7 @@ public class ReportController {
 
 	// 日報詳細画面
 	@GetMapping(value = "/{id}/")
-	public String detail(@PathVariable String id, Model model) {
+	public String detail(@PathVariable int id, Model model) {
 
 		model.addAttribute("report", reportService.findById(id));
 		return "reports/detail";
@@ -51,13 +52,7 @@ public class ReportController {
 
 	// 日報更新画面
 	@GetMapping(value = "/{id}/update")
-	public String getupdate(@PathVariable String id, Model model, Report report) {
-		if (id == null) {
-			model.addAttribute("report", report);
-		} else {
-
-			model.addAttribute("report", reportService.findById(id));
-		}
+	public String getupdate(@PathVariable int id, Model model, Report report) {
 
 		return "reports/update";
 	}
@@ -69,14 +64,14 @@ public class ReportController {
 
 
 		if (res.hasErrors()) {
-			return getupdate(null, model, report);
+			return getupdate((Integer) null, model, report);
 		}
 
 		ErrorKinds result = reportService.update(report);
 
 		if (ErrorMessage.contains(result)) {
 			model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-			return getupdate(null, model, report);
+			return getupdate((Integer) null, model, report);
 		}
 
 
@@ -85,11 +80,13 @@ public class ReportController {
 	}
 
 	// 日報新規登録画面
-	@GetMapping(value = "/add")
-	public String create(@ModelAttribute Report report) {
+		@GetMapping(value = "/add")
+		public String create(@ModelAttribute Report report,@AuthenticationPrincipal UserDetail ud , BindingResult res,Model model) {
 
-		return "reports/new";
-	}
+			report.setEmployee(ud.getEmployee());
+//			model.addAttribute("report", report); @ModelAttributeのアノテーションが付いているのでわざわざrequestスコープに登録する必要はありませんでした。
+			return "reports/new";
+		}
 
 	// 日報新規登録処理
 	@PostMapping(value = "/add")
@@ -98,30 +95,30 @@ public class ReportController {
 
 		// 入力チェック
 		if (res.hasErrors()) {
-			return create(report);
+			return create(report, res, model);
 		}
 
 
-		try {
-			ErrorKinds result = reportService.save(report);
+//		try {
+//			ErrorKinds result = reportService.save(report);
+//
+//			if (ErrorMessage.contains(result)) {
+//				model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+//				return create(report, null, res, model);
+//			}
+//
+//		} catch (DataIntegrityViolationException e) {
+//			model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DUPLICATE_EXCEPTION_ERROR),
+//					ErrorMessage.getErrorValue(ErrorKinds.DUPLICATE_EXCEPTION_ERROR));
+//			return create(report, null, res, model);
+//		}
 
-			if (ErrorMessage.contains(result)) {
-				model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-				return create(report);
-			}
-
-		} catch (DataIntegrityViolationException e) {
-			model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DUPLICATE_EXCEPTION_ERROR),
-					ErrorMessage.getErrorValue(ErrorKinds.DUPLICATE_EXCEPTION_ERROR));
-			return create(report);
-		}
-
-		return "redirect:/reports";
+	return "redirect:/reports";
 	}
 
 	// 日報削除処理
 	@PostMapping(value = "/{code}/delete")
-	public String delete(@PathVariable String id, @AuthenticationPrincipal ContentDetail contentDetail, Model model) {
+	public String delete(@PathVariable int id, @AuthenticationPrincipal ContentDetail contentDetail, Model model) {
 
 		ErrorKinds result = reportService.delete(id, contentDetail);
 
