@@ -18,20 +18,11 @@
 
                 <div class="col-xl-12">
                     <div class="card">
-                    	<div class="card-header">
-   						 	パスワードは変更する場合のみ入力してください。
-  							</div>
                         <div class="card-body mb-5">
-						<form th:action="@{/reports/update}" th:object="${report}" th:method="post">
+						<form th:action="@{/reports/{id}/update(id=${report.id})}" th:object="${report}" th:method="post">
                             <div class="wizard wizard-success mb-4">
 
-                                <div class="mb-3">
-                                        <label class="form-label" for="code">社員番号</label>
-                                        <p class="mb-1"></p>
-                                        <div class="col-md-7">
-                                        	<p th:text="*{code}"></p>
-                                        	<input type="hidden" th:field="*{code}">
-                                        </div>
+
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label" for="reportDate">日付</label>
@@ -48,8 +39,8 @@
 										<label class="form-label" for="name">氏名</label>
 										<p class="mb-1"></p>
 										<div class="col-md-7">
-											<p th:text="*{name}"></p>
-											<input type="hidden" th:field="*{name}">
+											<p th:text="*{employee.name}"></p>
+											<input type="hidden" th:field="*{employee.name}">
 										</div>
 									</div>
 									<div class="mb-3">
@@ -64,7 +55,7 @@
 										<label class="form-label" for="content">内容</label>
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
-                                            <input class="form-control" type="text" th:field="*{content}" th:errorclass="err" id="name">
+                                            <textarea class="form-control" cols="50" rows="10" type="text" th:field="*{content}" th:errorclass="err" id="name"></textarea>
                                             <span th:errors="*{content}" class="text-danger"></span>
 										</div>
                                     </div>

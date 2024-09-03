@@ -1,9 +1,11 @@
 
 package com.techacademy.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +26,7 @@ import lombok.Data;
 public class Report {
 
 	@ManyToOne()
-	@JoinColumn(name = "employee_code", referencedColumnName = "code")
+	@JoinColumn(name = "employee_code", referencedColumnName = "code", nullable = false)
 	Employee employee;
 
 	// ID
@@ -36,7 +38,8 @@ public class Report {
 	// 日付
 	@Column(nullable = false)
 	@NotNull
-	private LocalDateTime reportDate;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate reportDate;
 
 	// タイトル
 	@Column(length = 100, nullable = false)
@@ -45,8 +48,9 @@ public class Report {
 	private String title;
 
 	// 内容
-	@Column(nullable = false)
+	@Column(columnDefinition="LONGTEXT")
 	@NotEmpty
+	@Length(max = 600)
 	private String content;
 
 

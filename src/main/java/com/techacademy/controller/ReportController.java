@@ -1,5 +1,8 @@
 package com.techacademy.controller;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,15 +47,19 @@ public class ReportController {
 
 	// 日報詳細画面
 	@GetMapping(value = "/{id}/")
-	public String detail(@PathVariable int id, Model model) {
+	public String detail(@PathVariable int id, Report report, Model model) {
 
+		model.addAttribute("employee", report.getEmployee());
 		model.addAttribute("report", reportService.findById(id));
 		return "reports/detail";
 	}
 
 	// 日報更新画面
 	@GetMapping(value = "/{id}/update")
-	public String getupdate(@PathVariable int id, Model model, Report report) {
+	public String getupdate(@PathVariable("id") Integer id, Model model, Report report) {
+
+		model.addAttribute("employee", report.getEmployee());
+		model.addAttribute("report", reportService.findById(id));
 
 		return "reports/update";
 	}
@@ -61,63 +68,71 @@ public class ReportController {
 	@PostMapping(value = "/update")
 	public String postupdate(@Validated Report report, BindingResult res, Model model) {
 
-
+		Employee employee = report.getEmployee();
+		model.addAttribute("employee", employee);
 
 		if (res.hasErrors()) {
-			return getupdate((Integer) null, model, report);
+			return getupdate(report.getId(), model, report);
 		}
 
-		ErrorKinds result = reportService.update(report);
+		try {
 
-		if (ErrorMessage.contains(result)) {
-			model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-			return getupdate((Integer) null, model, report);
+			List<Report> existingReports = reportService.findByDisAndDate(report.getId(), report.getReportDate());
+			if (!existingReports.isEmpty()) {
+				model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DATECHECK_ERROR),
+						ErrorMessage.getErrorValue(ErrorKinds.DATECHECK_ERROR));
+				return getupdate(report.getId(), model, report);
+
+			}
+			ErrorKinds result = reportService.save(report);
+
+		} catch (DataIntegrityViolationException e) {
+
+		}
+		return getupdate(report.getId(), model, report);
+	}
+
+	// 日報新規登録画面
+	@GetMapping(value = "/add")
+	public String create(@ModelAttribute Report report, @AuthenticationPrincipal UserDetail ud) {
+
+		report.setEmployee(ud.getEmployee());
+//			model.addAttribute("report", report); @ModelAttributeのアノテーションが付いているのでわざわざrequestスコープに登録する必要はありませんでした。
+		return "reports/new";
+	}
+
+	// 日報新規登録処理
+	@PostMapping(value = "/add")
+	public String add(@Validated Report report, BindingResult res, @AuthenticationPrincipal UserDetail ud,
+			Model model) {
+
+		// 入力チェック
+		if (res.hasErrors()) {
+			return create(report, ud);
 		}
 
+		try {
+			report.setEmployee(ud.getEmployee());
 
+			List<Report> existingReports = reportService.findByEmpAndDate(ud.getEmployee(), report.getReportDate());
+			if (!existingReports.isEmpty()) {
+				model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DATECHECK_ERROR),
+						ErrorMessage.getErrorValue(ErrorKinds.DATECHECK_ERROR));
+				return create(report, ud);
+
+			}
+			ErrorKinds result = reportService.save(report);
+
+		} catch (DataIntegrityViolationException e) {
+
+			return create(report, ud);
+		}
 
 		return "redirect:/reports";
 	}
 
-	// 日報新規登録画面
-		@GetMapping(value = "/add")
-		public String create(@ModelAttribute Report report,@AuthenticationPrincipal UserDetail ud , BindingResult res,Model model) {
-
-			report.setEmployee(ud.getEmployee());
-//			model.addAttribute("report", report); @ModelAttributeのアノテーションが付いているのでわざわざrequestスコープに登録する必要はありませんでした。
-			return "reports/new";
-		}
-
-	// 日報新規登録処理
-	@PostMapping(value = "/add")
-	public String add(@Validated Report report, BindingResult res, Model model) {
-
-
-		// 入力チェック
-		if (res.hasErrors()) {
-			return create(report, res, model);
-		}
-
-
-//		try {
-//			ErrorKinds result = reportService.save(report);
-//
-//			if (ErrorMessage.contains(result)) {
-//				model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-//				return create(report, null, res, model);
-//			}
-//
-//		} catch (DataIntegrityViolationException e) {
-//			model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DUPLICATE_EXCEPTION_ERROR),
-//					ErrorMessage.getErrorValue(ErrorKinds.DUPLICATE_EXCEPTION_ERROR));
-//			return create(report, null, res, model);
-//		}
-
-	return "redirect:/reports";
-	}
-
 	// 日報削除処理
-	@PostMapping(value = "/{code}/delete")
+	@PostMapping(value = "/{id}/delete")
 	public String delete(@PathVariable int id, @AuthenticationPrincipal ContentDetail contentDetail, Model model) {
 
 		ErrorKinds result = reportService.delete(id, contentDetail);
@@ -125,7 +140,7 @@ public class ReportController {
 		if (ErrorMessage.contains(result)) {
 			model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
 			model.addAttribute("report", reportService.findById(id));
-			return detail(id, model);
+			return detail(id, null, model);
 		}
 
 		return "redirect:/reports";
