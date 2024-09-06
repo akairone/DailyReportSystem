@@ -47,49 +47,45 @@ public class ReportController {
 
 	// 日報詳細画面
 	@GetMapping(value = "/{id}/")
-	public String detail(@PathVariable int id, Report report, Model model) {
+	public String detail(@PathVariable int id, Model model) {
 
-		model.addAttribute("employee", report.getEmployee());
 		model.addAttribute("report", reportService.findById(id));
 		return "reports/detail";
 	}
 
 	// 日報更新画面
 	@GetMapping(value = "/{id}/update")
-	public String getupdate(@PathVariable("id") Integer id, Model model, Report report) {
+	public String getUpdate(@PathVariable("id") Integer id, Model model) {
 
-		model.addAttribute("employee", report.getEmployee());
 		model.addAttribute("report", reportService.findById(id));
 
 		return "reports/update";
 	}
 
 	// 日報更新処理
-	@PostMapping(value = "/update")
-	public String postupdate(@Validated Report report, BindingResult res, Model model) {
-
-		Employee employee = report.getEmployee();
-		model.addAttribute("employee", employee);
+	@PostMapping(value = "/{id}/update")
+	public String postUpdate(@PathVariable("id") Integer id, @Validated Report report, BindingResult res, Model model) {
 
 		if (res.hasErrors()) {
-			return getupdate(report.getId(), model, report);
+			model.addAttribute("report", report);
+			return getUpdate(id, model);
 		}
 
-		try {
+		ErrorKinds result = reportService.update(report);
 
-			List<Report> existingReports = reportService.findByDisAndDate(report.getId(), report.getReportDate());
-			if (!existingReports.isEmpty()) {
-				model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DATECHECK_ERROR),
-						ErrorMessage.getErrorValue(ErrorKinds.DATECHECK_ERROR));
-				return getupdate(report.getId(), model, report);
+		List<Report> existingReports = reportService.findByDisAndDate(id, report.getReportDate());
+		if (!existingReports.isEmpty()) {
+			for (Report existingReport : existingReports) {
 
+				if (existingReport.getId() != report.getId()) {
+					model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DATECHECK_ERROR),
+							ErrorMessage.getErrorValue(ErrorKinds.DATECHECK_ERROR));
+					return getUpdate(id, model);
+				}
 			}
-			ErrorKinds result = reportService.save(report);
-
-		} catch (DataIntegrityViolationException e) {
-
 		}
-		return getupdate(report.getId(), model, report);
+
+		return "redirect:/reports";
 	}
 
 	// 日報新規登録画面
@@ -140,7 +136,7 @@ public class ReportController {
 		if (ErrorMessage.contains(result)) {
 			model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
 			model.addAttribute("report", reportService.findById(id));
-			return detail(id, null, model);
+			return detail(id, model);
 		}
 
 		return "redirect:/reports";

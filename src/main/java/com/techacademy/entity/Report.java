@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,9 +26,7 @@ import lombok.Data;
 @SQLRestriction("delete_flg = false")
 public class Report {
 
-	@ManyToOne()
-	@JoinColumn(name = "employee_code", referencedColumnName = "code", nullable = false)
-	Employee employee;
+
 
 	// ID
 	@Id
@@ -48,7 +47,7 @@ public class Report {
 	private String title;
 
 	// 内容
-	@Column(columnDefinition="LONGTEXT")
+	@Column(columnDefinition="LONGTEXT",nullable = false )
 	@NotEmpty
 	@Length(max = 600)
 	private String content;
@@ -66,4 +65,7 @@ public class Report {
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
 
+	@ManyToOne
+	@JoinColumn(name = "employee_code", referencedColumnName = "code", nullable = false)
+	Employee employee;
 }

@@ -40,8 +40,6 @@ public class Employee {
         }
 
     }
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
-    private List<Report> reportList;
 
     // ID
     @Id
@@ -79,5 +77,8 @@ public class Employee {
     // 更新日時
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
+    private List<Report> reportList;
 
 }

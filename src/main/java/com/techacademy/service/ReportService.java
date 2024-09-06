@@ -90,7 +90,7 @@ public class ReportService {
 	}
 
 	// 表示中の従業員と日付が一致する日報取得
-		public List<Report> findByDisAndDate(int id, LocalDate reportDate ) {
+		public List<Report> findByDisAndDate(Integer id, LocalDate reportDate ) {
 			return reportRepository.findByIdAndReportDate(id, reportDate);
 		}
 
