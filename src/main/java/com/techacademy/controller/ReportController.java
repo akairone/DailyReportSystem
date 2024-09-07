@@ -51,36 +51,40 @@ public class ReportController {
 
 		model.addAttribute("report", reportService.findById(id));
 		return "reports/detail";
+
 	}
 
 	// 日報更新画面
 	@GetMapping(value = "/{id}/update")
-	public String getUpdate(@PathVariable("id") Integer id, Model model) {
-
+	public String getUpdate(@PathVariable("id") Integer id, Model model, Report report) {
+		if (id == null) {
+			model.addAttribute("report",report);
+		} else {
 		model.addAttribute("report", reportService.findById(id));
-
+		}
 		return "reports/update";
+
 	}
 
 	// 日報更新処理
 	@PostMapping(value = "/{id}/update")
-	public String postUpdate(@PathVariable("id") Integer id, @Validated Report report, BindingResult res, Model model) {
+	public String postUpdate( @Validated Report report, BindingResult res, Model model) {
 
 		if (res.hasErrors()) {
 			model.addAttribute("report", report);
-			return getUpdate(id, model);
+			return getUpdate(null, model, report);
 		}
-
+		report.setEmployee(report.getEmployee());
 		ErrorKinds result = reportService.update(report);
 
-		List<Report> existingReports = reportService.findByDisAndDate(id, report.getReportDate());
+		List<Report> existingReports = reportService.findByEmpAndDate(report.getEmployee(), report.getReportDate());
 		if (!existingReports.isEmpty()) {
 			for (Report existingReport : existingReports) {
 
 				if (existingReport.getId() != report.getId()) {
 					model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DATECHECK_ERROR),
 							ErrorMessage.getErrorValue(ErrorKinds.DATECHECK_ERROR));
-					return getUpdate(id, model);
+					return getUpdate(null, model, report);
 				}
 			}
 		}

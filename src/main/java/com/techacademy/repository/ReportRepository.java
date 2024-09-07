@@ -11,5 +11,7 @@ import com.techacademy.entity.Report;
 public interface ReportRepository extends JpaRepository<Report, Integer> {
 	List<Report> findByEmployeeAndReportDate(Employee employee, LocalDate reportDate );
 
-	List<Report> findByIdAndReportDate(int id, LocalDate reportDate);
+//	List<Report> findByIdAndReportDate(int id, LocalDate reportDate);
+
+
 }

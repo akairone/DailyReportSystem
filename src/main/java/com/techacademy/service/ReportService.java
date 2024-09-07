@@ -17,6 +17,7 @@ import com.techacademy.entity.Report;
 import com.techacademy.repository.ReportRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Service
 public class ReportService {
 
@@ -25,6 +26,7 @@ public class ReportService {
 	public ReportService(ReportRepository reportRepository, PasswordEncoder passwordEncoder) {
 		this.reportRepository = reportRepository;
 	}
+
 
 	// 日報保存
 	@Transactional
@@ -89,9 +91,12 @@ public class ReportService {
 		return reportRepository.findByEmployeeAndReportDate(employee, reportDate);
 	}
 
-	// 表示中の従業員と日付が一致する日報取得
-		public List<Report> findByDisAndDate(Integer id, LocalDate reportDate ) {
-			return reportRepository.findByIdAndReportDate(id, reportDate);
-		}
+
+
+
+//	// 表示中の従業員と日付が一致する日報取得
+//		public List<Report> findByDisAndDate(Integer id, LocalDate reportDate ) {
+//			return reportRepository.findByIdAndReportDate(id, reportDate);
+//		}
 
 }
