@@ -92,6 +92,12 @@ public class ReportService {
 	}
 
 
+	public List<Report> findByEmployee(Employee employee) {
+		// TODO 自動生成されたメソッド・スタブ
+		return reportRepository.findByEmployee(employee);
+	}
+
+
 
 
 //	// 表示中の従業員と日付が一致する日報取得
